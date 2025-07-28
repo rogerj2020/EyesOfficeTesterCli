@@ -1,0 +1,62 @@
+name: Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers when a new tag starting with 'v' is pushed
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest # Or a matrix of OSs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # Or your specific version, e.g., '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+        
+      - name: Build
+        run: dotnet build --no-restore
+        
+      - name: Publish
+        run: dotnet publish -c Release -o publish
+        
+      - name: Create Zip Archive
+        shell: pwsh # Use PowerShell for cross-platform scripting
+        run: |
+          if ($env:RUNNER_OS -eq "Windows") {
+            7z a EyesOfficeTesterCli.zip ./bin/Debug/net8.0-windows/* # Adjust path as needed
+          } else {
+            zip -r EyesOfficeTesterCli.zip ./bin/Debug/net8.0-windows # Adjust path as needed
+          }
+          
+      - name: Rename Zip file
+          shell: pwsh
+          run: Move-Item -Path EyesOfficeTesterCli.zip -Destination EyesOfficeTesterCli-${{ github.ref }}.zip
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: EyesOfficeTesterCli-${{ github.ref }}.zip # Path to your built artifact
+          asset_name: EyesOfficeTesterCli-${{ github.ref }}.zip # Name of the asset in the release
+          asset_content_type: application/zip

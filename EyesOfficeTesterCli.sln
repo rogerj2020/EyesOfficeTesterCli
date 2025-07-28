@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EyesOfficeTesterLib", "EyesOfficeTester\EyesOfficeTesterLib.csproj", "{651256D5-6D54-4EEE-86F9-5BC63AC7845E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EyesOfficeTesterCli", "EyesOfficeTesterCli\EyesOfficeTesterCli.csproj", "{CF1AFD6C-D146-406E-9C03-98C04D8EC342}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{651256D5-6D54-4EEE-86F9-5BC63AC7845E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{651256D5-6D54-4EEE-86F9-5BC63AC7845E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{651256D5-6D54-4EEE-86F9-5BC63AC7845E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{651256D5-6D54-4EEE-86F9-5BC63AC7845E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF1AFD6C-D146-406E-9C03-98C04D8EC342}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF1AFD6C-D146-406E-9C03-98C04D8EC342}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF1AFD6C-D146-406E-9C03-98C04D8EC342}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF1AFD6C-D146-406E-9C03-98C04D8EC342}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2EC6F548-ACC5-4DD1-9255-8EC56EC80D92}
+	EndGlobalSection
+EndGlobal

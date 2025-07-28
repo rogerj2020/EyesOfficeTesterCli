@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <!--<TargetFramework>net8.0</TargetFramework>-->
+	  <TargetFramework>net8.0-windows</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <UseWindowsForms>true</UseWindowsForms>
+	  <OutputType>Exe</OutputType>
+	  <StartupObject>EyesOfficeTesterCli.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EyesOfficeTester\EyesOfficeTesterLib.csproj" />
+  </ItemGroup>
+
+</Project>
