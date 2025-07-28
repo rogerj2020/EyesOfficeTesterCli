@@ -37,8 +37,8 @@ jobs:
           }
           
       - name: Rename Zip file
-          shell: pwsh
-          run: Move-Item -Path EyesOfficeTesterCli.zip -Destination EyesOfficeTesterCli-${{ github.ref }}.zip
+        shell: pwsh
+        run: Move-Item -Path EyesOfficeTesterCli.zip -Destination EyesOfficeTesterCli-${{ github.ref }}.zip
 
       - name: Create Release
         id: create_release
