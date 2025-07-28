@@ -21,8 +21,8 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
         
-      - name: Build
-        run: dotnet build --no-restore
+      - name: Build EyesOfficeTesterCli
+        run: dotnet msbuild -v:normal "EyesOfficeTesterCli\EyesOfficeTesterCli.csproj" -p:Configuration=RELEASE 
         
       - name: Publish
         run: dotnet publish -c Release -o publish
