@@ -1,5 +1,8 @@
 name: Release Workflow
 
+permissions:
+  contents: write # Grants write access to repository contents, including releases
+
 on:
   push:
     tags:
