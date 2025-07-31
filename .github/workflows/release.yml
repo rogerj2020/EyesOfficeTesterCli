@@ -13,27 +13,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      # - name: Setup .NET
+        # uses: actions/setup-dotnet@v4
+        # with:
+          # dotnet-version: '8.0.x' # Or your specific version, e.g., '6.0.x'
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
         with:
-          dotnet-version: '8.0.x' # Or your specific version, e.g., '6.0.x'
+          vs-version: '2022'
 
       - name: Restore dependencies
         run: dotnet restore
         
-      - name: Build EyesOfficeTesterCli
-        run: dotnet msbuild -v:normal "EyesOfficeTesterCli\EyesOfficeTesterCli.csproj" -p:Configuration=RELEASE 
+      #- name: Build EyesOfficeTesterCli
+      #  run: dotnet msbuild -v:normal "EyesOfficeTesterCli\EyesOfficeTesterCli.csproj" -p:Configuration=RELEASE
+      
+      - name: Build Solution
+        run: MSBuild.exe EyesOfficeTesterCli.sln /p:Configuration=Release /p:Platform="Any CPU"
         
-      - name: Publish
-        run: dotnet publish -c Release -o publish
+      #- name: Publish
+      #  run: dotnet publish -c Release -o publish
         
       - name: Create Zip Archive
         shell: pwsh # Use PowerShell for cross-platform scripting
         run: |
           if ($env:RUNNER_OS -eq "Windows") {
-            7z a EyesOfficeTesterCli.zip ./bin/Debug/net8.0-windows/* # Adjust path as needed
+            7z a EyesOfficeTesterCli.zip ./bin/Release/net8.0-windows/* # Adjust path as needed
           } else {
-            zip -r EyesOfficeTesterCli.zip ./bin/Debug/net8.0-windows # Adjust path as needed
+            zip -r EyesOfficeTesterCli.zip ./bin/Release/net8.0-windows # Adjust path as needed
           }
           
       - name: Rename Zip file
