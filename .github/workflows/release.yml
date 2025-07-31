@@ -39,9 +39,9 @@ jobs:
         shell: pwsh # Use PowerShell for cross-platform scripting
         run: |
           if ($env:RUNNER_OS -eq "Windows") {
-            7z a EyesOfficeTesterCli.zip ./bin/Release/net8.0-windows/* # Adjust path as needed
+            7z a EyesOfficeTesterCli.zip ./EyesOfficeTesterCli/bin/Release/net8.0-windows/* # Adjust path as needed
           } else {
-            zip -r EyesOfficeTesterCli.zip ./bin/Release/net8.0-windows # Adjust path as needed
+            zip -r EyesOfficeTesterCli.zip ./EyesOfficeTesterCli/bin/Release/net8.0-windows # Adjust path as needed
           }
           
       - name: Rename Zip file
