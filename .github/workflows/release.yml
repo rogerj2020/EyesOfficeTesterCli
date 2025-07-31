@@ -16,11 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Setup .NET
-        # uses: actions/setup-dotnet@v4
-        # with:
-          # dotnet-version: '8.0.x' # Or your specific version, e.g., '6.0.x'
-
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
         with:
@@ -28,15 +23,9 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
-        
-      #- name: Build EyesOfficeTesterCli
-      #  run: dotnet msbuild -v:normal "EyesOfficeTesterCli\EyesOfficeTesterCli.csproj" -p:Configuration=RELEASE
       
       - name: Build Solution
         run: MSBuild.exe EyesOfficeTesterCli.sln /p:Configuration=Release /p:Platform="Any CPU"
-        
-      #- name: Publish
-      #  run: dotnet publish -c Release -o publish
         
       - name: Create Zip Archive
         shell: pwsh # Use PowerShell for cross-platform scripting
