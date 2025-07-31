@@ -46,7 +46,7 @@ jobs:
           
       - name: Rename Zip file
         shell: pwsh
-        run: Move-Item -Path EyesOfficeTesterCli.zip -Destination EyesOfficeTesterCli-${{ github.ref }}.zip
+        run: Move-Item -Path EyesOfficeTesterCli.zip -Destination EyesOfficeTesterCli-${{ github.ref_name }}.zip
 
       - name: Create Release
         id: create_release
@@ -54,8 +54,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
 
@@ -65,6 +65,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: EyesOfficeTesterCli-${{ github.ref }}.zip # Path to your built artifact
-          asset_name: EyesOfficeTesterCli-${{ github.ref }}.zip # Name of the asset in the release
+          asset_path: EyesOfficeTesterCli-${{ github.ref_name }}.zip # Path to your built artifact
+          asset_name: EyesOfficeTesterCli-${{ github.ref_name }}.zip # Name of the asset in the release
           asset_content_type: application/zip
