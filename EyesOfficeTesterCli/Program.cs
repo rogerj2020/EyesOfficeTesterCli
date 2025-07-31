@@ -23,6 +23,8 @@ namespace EyesOfficeTesterCli
             String? apiKey = cliParser.GetStringArgument("apiKey", 'k');
             String? serverUrl = cliParser.GetStringArgument("serverUrl", 'u');
 
+            bool isFailOnDiff = cliParser.GetSwitchArgument("failOnDiff", 'f');
+
 
             IProgress<EyesOfficeProgressUpdate> progress;
             EyesOfficeTester eyesOfficeTester;
@@ -37,7 +39,7 @@ namespace EyesOfficeTesterCli
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd_HH.mm.ss.fff",
                                                     CultureInfo.InvariantCulture);
 
-                    Console.WriteLine("[" + timestamp + "] " + update.progressMessage + " (" + update.progressValue + "%) ***");
+                    Console.WriteLine("[" + timestamp + "] " + update.progressMessage + " (" + update.progressValue + "%)");
                     if (isSaveImages && update.pngBytes != null)
                     {
                         string imageDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -65,6 +67,7 @@ namespace EyesOfficeTesterCli
 
             eyesOfficeTester.ReportImages(isSaveImages);
             eyesOfficeTester.NotifyOnCompletion(notifyOnCompletion);
+            eyesOfficeTester.FailOnDiff(isFailOnDiff);
             eyesOfficeTester.CheckOfficeFiles(workingDir, hasProgressBar);
         }
     }

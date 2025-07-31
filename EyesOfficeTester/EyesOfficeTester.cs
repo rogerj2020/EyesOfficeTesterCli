@@ -1,7 +1,9 @@
 ﻿using Applitools;
 using Applitools.Images;
 using Microsoft.Office.Interop.Word;
+using Newtonsoft.Json.Linq;
 using System.Drawing.Imaging;
+using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 using IDataObject = System.Windows.Forms.IDataObject;
 
@@ -22,6 +24,7 @@ namespace EyesOfficeTesterLib
         private string? _batchName = "Microsoft Office Tests";
         private string? _serverUrl = "https://eyesapi.applitools.com";
         private bool? _notifyOnCompletion = false;
+        private static bool _isFailOnDiff = true;
        
         
         private EyesOfficeProgressUpdate? _eyesOfficeProgressUpdate;
@@ -81,6 +84,11 @@ namespace EyesOfficeTesterLib
             this._notifyOnCompletion = notifyOnCompletion;
         }
 
+        public void FailOnDiff(bool isFailOnDiff)
+        {
+            _isFailOnDiff = isFailOnDiff;
+        }
+
         private void ReportProgress(string message, int value, Bitmap bmp, bool isError)
         {
             if (_progress != null && _eyesOfficeProgressUpdate != null)
@@ -116,7 +124,14 @@ namespace EyesOfficeTesterLib
 
         void ResetProgress()
         {
-            ReportProgress("", 0, null, false);
+            if(_eyesOfficeProgressUpdate != null)
+            {
+                _eyesOfficeProgressUpdate.progressValue = 0;
+                _eyesOfficeProgressUpdate.progressMessage = "";
+                _eyesOfficeProgressUpdate.hasError = false;
+                _eyesOfficeProgressUpdate.pngBytes = null;
+                _eyesOfficeProgressUpdate.bitmap = null;
+            }
         }
 
         private void SetupEyes()
@@ -127,7 +142,6 @@ namespace EyesOfficeTesterLib
             {
                 BatchInfo = new BatchInfo(_batchName);
                 BatchInfo.Id = _batchId;
-                Console.WriteLine("New batch id: " + BatchInfo.Id);
             }
             BatchInfo.NotifyOnCompletion = _notifyOnCompletion;
             Eyes.Batch = BatchInfo;
@@ -137,10 +151,10 @@ namespace EyesOfficeTesterLib
             }
         }
 
-        private void OpenEyes()
+        private void OpenEyes(String appName, String testName)
         {
             // Start the session and set app name and test name.
-            Eyes?.Open(_appName, _testName);
+            Eyes?.Open(appName, testName);
         }
 
         private void AbortEyes()
@@ -153,9 +167,9 @@ namespace EyesOfficeTesterLib
             Eyes?.Close(false);
         }
 
-        public void TearDownEyes()
+        private static TestResultsSummary TearDownEyes()
         {
-            EyesRunner.GetAllTestResults();
+            return EyesRunner.GetAllTestResults(_isFailOnDiff);
         }
 
         private IEnumerable<FileInfo> GetFilesByExtensions(DirectoryInfo dir, params string[] extensions)
@@ -185,38 +199,23 @@ namespace EyesOfficeTesterLib
                 thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
                 thread.Start();
                 thread.Join(); //Wait for the thread to end
-
-
             }
-            Console.WriteLine("Eyes Batch ID: " + EyesOfficeTester.BatchInfo.Id);
 
-            TearDownEyes();
+            TestResultsSummary summary = TearDownEyes();
+            Console.WriteLine("[Test Results]==============\n" + summary.ToString());
             Console.WriteLine("Done checking Office Documents with Eyes.");
         }
 
         private void CheckFile(FileInfo file)
         {
             ResetProgress();
-            if(_testName?.Length < 1)
-            {
-                _testName = Path.GetFileName(file.FullName);
-            }
-            // ReportImages(reportImages);
             string fileExt = Path.GetExtension(file.FullName);
             if (WordFileExtensions.Contains(fileExt))
             {
-                if (_appName?.Length < 1)
-                {
-                    _appName = "Microsoft Word";
-                }
                 CheckWordPages(file.FullName);
             }
             else if (ExcelFileExtensions.Contains(fileExt))
             {
-                if (_appName?.Length < 1)
-                {
-                    _appName = "Microsoft Excel";
-                }
                 CheckSheets(file.FullName);
             }
         }
@@ -235,7 +234,13 @@ namespace EyesOfficeTesterLib
             myWordDoc = myWordApp.Documents.Add(filePath, missing, missing, missing);
 
             // Start the session and set app name and test name.
-            OpenEyes();
+            String testName = String.IsNullOrEmpty(_testName) ?
+                new FileInfo(filePath).Name : _testName;
+
+            String appName = String.IsNullOrEmpty(_appName) ?
+                "Microsoft Word" : _appName;
+
+            OpenEyes(appName, testName);
 
             foreach (Microsoft.Office.Interop.Word.Window window in myWordDoc.Windows)
             {
@@ -246,7 +251,6 @@ namespace EyesOfficeTesterLib
                 for (var i = 1; i <= pane.Pages.Count; i++)
                 {
                     var bits = pane.Pages[i].EnhMetaFileBits;
-                    //var target = filePath + "_image.doc";
                     try
                     {
                         Bitmap bmp = EyesCheckWordPageBits(bits,i);
@@ -325,7 +329,6 @@ namespace EyesOfficeTesterLib
                 BatchInfo = new BatchInfo(_batchName);
                 BatchInfo.Id = _batchId;
                 BatchInfo.NotifyOnCompletion = true;
-                Console.WriteLine("New Excel batch id: " + BatchInfo.Id);
             }
             string progressMessage = "Checking Excel Document: " + xlsFile + "...";
             int progressValue = 0;
@@ -345,7 +348,13 @@ namespace EyesOfficeTesterLib
             Excel.Workbook wb = xl.Workbooks.Open(xlsFile);
             try
             {
-                OpenEyes();
+                String testName = String.IsNullOrEmpty(_testName) ?
+                new FileInfo(xlsFile).Name : _testName;
+
+                String appName = String.IsNullOrEmpty(_appName) ?
+                    "Microsoft Excel" : _appName;
+
+                OpenEyes(appName, testName);
 
                 foreach (Excel.Worksheet sheet in wb.Worksheets)
                 {
@@ -375,9 +384,7 @@ namespace EyesOfficeTesterLib
                 {
                     Eyes.Abort();
                 }
-                Console.WriteLine("EyesOfficeTester: " + ex.Message);
-                Console.WriteLine(ex.StackTrace);
-                progressMessage = "ERROR: " + ex.Message;
+                progressMessage = "ERROR: " + ex.Message + "\n" + ex.StackTrace;
                 ReportProgress(progressMessage, progressValue, null, true);
             }
             finally
@@ -400,7 +407,9 @@ namespace EyesOfficeTesterLib
             Thread.Sleep(800);
             r.CopyPicture(Excel.XlPictureAppearance.xlScreen,
                            Excel.XlCopyPictureFormat.xlBitmap);
-            
+
+            Thread.Sleep(800);
+
             Bitmap bmp = null;
 
             if (Clipboard.GetDataObject() != null)
@@ -423,14 +432,12 @@ namespace EyesOfficeTesterLib
                 {
                     progressMessage = "No image in Clipboard !!";
                     ReportProgress(progressMessage, progressValue, null, true);
-                    Console.WriteLine("EyesOfficeTester: No image in Clipboard !!");
                 }
             }
             else
             {
                 progressMessage = "Clipboard Empty !!";
                 ReportProgress(progressMessage, progressValue, null, true);
-                Console.WriteLine("EyesOfficeTester: Clipboard Empty !!");
             }
 
             return bmp;
